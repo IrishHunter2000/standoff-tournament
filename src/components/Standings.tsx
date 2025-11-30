@@ -1,13 +1,49 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlayerGamesModal } from "./PlayerGamesModal";
 import { useData } from "../context/DataContext";
+import type { Standings } from "../types/types";
 
 export default function StandingsPage() {
-    const { tournaments, selectedTournament, standings, setSelectedTournament, games } = useData();
+    const { games, gamePlayers, tournaments, selectedTournament, setSelectedTournament } = useData();
 
-    const [modalPlayerId, setModalPlayerId] = useState<number | null>(null);
+    const [modalPlayerId, setModalPlayerId] = useState<string | null>(null);
     const [modalPlayerName, setModalPlayerName] = useState<string>("");
     const [playerGames, setPlayerGames] = useState<any[]>([]);
+    const [standings, setStandings] = useState<Standings[]>([]);
+
+    useEffect(() => {
+        if (gamePlayers.length === 0) return;
+        const totals = totalStandings(gamePlayers);
+        const sorted = sortStandings(totals);
+        setStandings(sorted);
+    }, [gamePlayers]);
+
+    const totalStandings = (data: any) => {
+        const totals = new Map();
+        data?.forEach((row: any) => {
+            const id = row.player_id;
+            const first_name = row.player.first_name;
+            const last_name = row.player.last_name;
+
+            if (!totals.has(id)) totals.set(id, { first_name, last_name, points: 0, health: 0 });
+            totals.get(id).health += row.remaining_health;
+            totals.get(id).points += row.points;
+        });
+        return totals;
+    }
+
+    const sortStandings = (totals: any) => {
+        const sorted = Array.from(totals, ([id, info]) => ({
+            id,
+            ...info,
+        })).sort((a, b) => {
+            if (b.points !== a.points) {
+                return b.points - a.points; // primary sort
+            }
+            return b.health - a.health; // secondary sort
+        });
+        return sorted;
+    };
 
     const medalForIndex = (index: number) => {
         if (index === 0) return "🥇";
@@ -16,7 +52,7 @@ export default function StandingsPage() {
         return null;
     };
 
-    const openPlayerModal = async (playerId: number, playerName: string) => {
+    const openPlayerModal = async (playerId: string, playerName: string) => {
         setModalPlayerId(playerId);
         setModalPlayerName(playerName);
         const filteredGames = games.filter((game) =>
@@ -30,6 +66,7 @@ export default function StandingsPage() {
         setPlayerGames([]);
     };
 
+    if (!gamePlayers || gamePlayers.length === 0) return <p>Retrieving standings now...</p>;
 	if (!standings) return <p>No standings found.</p>;
 
     return (

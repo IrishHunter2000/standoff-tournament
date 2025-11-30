@@ -35,6 +35,7 @@ export type Tournament = {
 };
 
 export type Standings = {
+    id: string;
     first_name: string;
     last_name: string;
     points: number;
@@ -44,13 +45,13 @@ export type Standings = {
 export type DataContextType = {
     players: Player[];
     teams: Team[];
-    games: any[];
+    games: Game[];
+    gamePlayers: GamePlayer[];
     currentTournament: Tournament | null;
     tournaments: Tournament[];
     selectedTournament: string;
     setSelectedTournament: Dispatch<SetStateAction<string>>;
     refreshTournament: () => Promise<void>;
-    standings: any[];
 };
 
 export type GamePlayerInput = {

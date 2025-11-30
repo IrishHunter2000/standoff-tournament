@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
-import type { Player, Team, Tournament, Game, GamePlayer, Standings, DataContextType } from "../types/types";
+import type { Player, Team, Tournament, Game, GamePlayer, DataContextType } from "../types/types";
 
 const DataContext = createContext<DataContextType | null>(null);
 
@@ -12,7 +12,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     const [selectedTournament, setSelectedTournament] = useState("all");
     const [games, setGames] = useState<Game[]>([]);
     const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>([]);
-    const [standings, setStandings] = useState<Standings[]>([]);
     // .eq("game.tournament_id", tournamentId);
     useEffect(() => {
         loadPlayers();
@@ -23,19 +22,19 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const loadPlayers = async () => {
-        const { data: playerData } = await supabase
+        const { data } = await supabase
             .from("player")
             .select("*")
             .order("first_name");
-        setPlayers(playerData || []);
+        setPlayers(data || []);
     }
 
     const loadTeams = async () => {
-        const { data: teamData } = await supabase
+        const { data } = await supabase
             .from("team")
             .select("*")
             .order("name");
-        setTeams(teamData || []);
+        setTeams(data || []);
     };
 
     const refreshTournament = async () => {
@@ -80,15 +79,12 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
             )
             .order("created_at", { ascending: false });
 
-        if (error) {
-            console.error("Error fetching games:", error);
-            setGames([]);
-        }
+        if (error) console.error("Error fetching games:", error);
         setGames(data as any);
     }
 
     const fetchStandings = async () => {
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from("game_player")
             .select(`
                 player_id,
@@ -98,41 +94,12 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 game ( tournament_id )
             `)
     
+        if (error) console.error("Error fetching game players:", error);
         setGamePlayers(data as any);
-        const totals = totalStandings(data);
-        const sorted = sortStandings(totals);
-        setStandings(sorted);
     }
-
-    const totalStandings = (data: any) => {
-        const totals = new Map();
-        data?.forEach((row: any) => {
-            const id = row.player_id;
-            const first_name = row.player.first_name;
-            const last_name = row.player.last_name;
-
-            if (!totals.has(id)) totals.set(id, { first_name, last_name, points: 0, health: 0 });
-            totals.get(id).health += row.remaining_health;
-            totals.get(id).points += row.points;
-        });
-        return totals;
-    }
-
-    const sortStandings = (totals: any) => {
-        const sorted = Array.from(totals, ([id, info]) => ({
-            id,
-            ...info,
-        })).sort((a, b) => {
-            if (b.points !== a.points) {
-                return b.points - a.points; // primary sort
-            }
-            return b.health - a.health; // secondary sort
-        });
-        return sorted;
-    };
 
     return (
-        <DataContext.Provider value={{ players, teams, games, currentTournament, tournaments, selectedTournament, setSelectedTournament, refreshTournament, standings }}>
+        <DataContext.Provider value={{ players, teams, games, gamePlayers, currentTournament, tournaments, selectedTournament, setSelectedTournament, refreshTournament }}>
             {children}
         </DataContext.Provider>
     );
