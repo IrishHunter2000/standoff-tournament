@@ -7,18 +7,14 @@ const DataContext = createContext<DataContextType | null>(null);
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     const [players, setPlayers] = useState<Player[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
-    const [currentTournament, setCurrentTournament] = useState<Tournament | null>(null);
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
-    const [selectedTournament, setSelectedTournament] = useState("all");
     const [games, setGames] = useState<Game[]>([]);
     const [gamePlayers, setGamePlayers] = useState<GamePlayer[]>([]);
-    // .eq("game.tournament_id", tournamentId);
+
     useEffect(() => {
         loadPlayers();
         loadTeams();
-        refreshTournament();
-        fetchGames();
-        fetchStandings();
+        loadUpdatedTables();
     }, []);
 
     const loadPlayers = async () => {
@@ -36,8 +32,14 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
             .order("name");
         setTeams(data || []);
     };
+    
+    const loadUpdatedTables = async () => {
+        loadTournaments();
+        loadGames();
+        loadStandings();
+    }
 
-    const refreshTournament = async () => {
+    const loadTournaments = async () => {
         const { data, error } = await supabase
             .from("tournament")
             .select("*")
@@ -45,11 +47,9 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (error) return console.error(error);
         setTournaments([{ id: "all", name: "All Time" }, ...data]);
-        setSelectedTournament(data[0]?.id);
-        setCurrentTournament(data[0]);
     };
 
-    const fetchGames = async () => {
+    const loadGames = async () => {
         const { data, error } = await supabase
             .from("game")
             .select(
@@ -58,6 +58,10 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 created_at,
                 game_number,
                 tournament: tournament_id!inner (
+                    id,
+                    name
+                ),
+                round: round_id!inner (
                     id,
                     name
                 ),
@@ -83,7 +87,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         setGames(data as any);
     }
 
-    const fetchStandings = async () => {
+    const loadStandings = async () => {
         const { data, error } = await supabase
             .from("game_player")
             .select(`
@@ -91,7 +95,9 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                 player ( first_name, last_name ),
                 points,
                 remaining_health,
-                game ( tournament_id )
+                game ( tournament_id ),
+                team_id,
+                team ( name, color )
             `)
     
         if (error) console.error("Error fetching game players:", error);
@@ -99,7 +105,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     return (
-        <DataContext.Provider value={{ players, teams, games, gamePlayers, currentTournament, tournaments, selectedTournament, setSelectedTournament, refreshTournament }}>
+        <DataContext.Provider value={{ players, teams, games, gamePlayers, tournaments, loadUpdatedTables }}>
             {children}
         </DataContext.Provider>
     );

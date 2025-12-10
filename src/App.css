@@ -1,7 +1,6 @@
 #root {
   width: 100%;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -36,6 +35,15 @@
 .read-the-docs {
   color: #888;
 }
+
+/* .standings-button {
+  background-color: transparent !important;
+  border-bottom: solid 2px gray;
+} */
+
+/* .standings-button:hover {
+  border-color: red;
+} */
 
 .reset-form-button {
   background-color: transparent !important;

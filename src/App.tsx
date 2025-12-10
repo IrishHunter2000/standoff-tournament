@@ -7,7 +7,7 @@ import GameForm from "./components/GameForm.tsx";
 import Standings from "./components/Standings.tsx";
 
 function App() {
-	const [page, setPage] = useState("standings");
+	const [page, setPage] = useState("grid");
 
 	return (
 		<div className="min-h-screen w-full flex flex-col">

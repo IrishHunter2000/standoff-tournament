@@ -1,5 +1,3 @@
-import type { Dispatch, SetStateAction } from "react";
-
 export type Player = {
     id: string;
     first_name: string;
@@ -17,6 +15,7 @@ export type Game = {
     created_at: string;
     game_number: number;
     tournament: Tournament;
+    round: Round;
     players: GamePlayer[];
 };
 
@@ -25,6 +24,9 @@ export type GamePlayer = {
     points: number;
     remaining_health: number;
     team: Team;
+    game?: {
+        tournament_id: string;
+    }
 };
 
 export type Tournament = {
@@ -34,10 +36,18 @@ export type Tournament = {
     created_at: string;
 };
 
+export type Round = {
+    id: string;
+    name: string;
+    created_at: string;
+};
+
 export type Standings = {
     id: string;
-    first_name: string;
-    last_name: string;
+    first_name?: string;
+    last_name?: string;
+    team_name?: string;
+    team_color?: string;
     points: number;
     health: number;
 }
@@ -47,17 +57,20 @@ export type DataContextType = {
     teams: Team[];
     games: Game[];
     gamePlayers: GamePlayer[];
-    currentTournament: Tournament | null;
     tournaments: Tournament[];
-    selectedTournament: string;
-    setSelectedTournament: Dispatch<SetStateAction<string>>;
-    refreshTournament: () => Promise<void>;
+    loadUpdatedTables: () => Promise<void>;
 };
 
 export type GamePlayerInput = {
     player_id: string | null;
     team_id: string | null;
     health: number | null;
+};
+
+export type Filter = {
+    tournament: string;
+    player: string;
+    team: string;
 };
 
 export type ValidationResult = {

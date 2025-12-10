@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useData } from "../context/DataContext";
 import { useToast } from "../context/ToastContext";
 import { validateForm } from "../context/validation";
-import type { GamePlayerInput } from "../types/types";
+import type { GamePlayerInput, Tournament } from "../types/types";
 
 const createEmptyEntries = () => ([
   { player_id: null, team_id: null, health: null },
@@ -13,7 +13,7 @@ const createEmptyEntries = () => ([
 ]);
 
 export default function GameForm() {
-    const { players, teams, currentTournament, refreshTournament } = useData();
+    const { players, teams, tournaments, loadUpdatedTables } = useData();
     const { showToast } = useToast();
 
     const [formData, setFormData] = useState<GamePlayerInput[]>([
@@ -22,7 +22,13 @@ export default function GameForm() {
         { player_id: null, team_id: null, health: null },
         { player_id: null, team_id: null, health: null },
     ]);
+    const [currentTournament, setCurrentTournament] = useState<Tournament | null>(null);
     const [errorMessages, setErrorMessages] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (tournaments.length === 0) return;
+        setCurrentTournament(tournaments[1])
+    }, [tournaments]);
 
     const updateField = (
         index: number,
@@ -100,8 +106,7 @@ export default function GameForm() {
 
         showToast("Game submitted successfully!", "success");
         resetForm();
-        refreshTournament();
-        console.log(currentTournament);
+        loadUpdatedTables();
     };
     
     const resetForm = () => {

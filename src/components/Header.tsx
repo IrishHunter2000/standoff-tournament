@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import standoff_logo from "../assets/standoff_logo.png"
 
 export default function Header({ page, setPage }: {
         page: string, setPage: React.Dispatch<React.SetStateAction<string>>
@@ -11,14 +12,11 @@ export default function Header({ page, setPage }: {
 	];
 
 	return (
-        <nav className="max-w-5xl mx-auto px-6 py-4">
-            {/* Title */}
-            <div className="text-2xl font-bold mb-3 text-white">
-                Tournament Dashboard
-            </div>
+        <nav className="w-full flex relative items-center px-6 py-4 bg-black">
+            <img className="w-1/12 left-0" src={standoff_logo} alt="Standoff Logo" />
 
             {/* TABS */}
-            <div className="relative justify-center flex gap-6 text-lg font-medium">
+            <div className="h-full absolute inset-0 flex justify-center items-center gap-6 text-lg font-medium">
                 {tabs.map((tab) => (
                 <button
                     key={tab.id}
