@@ -85,3 +85,7 @@
 .third-border {
   border: solid 1px #CD7F32;
 }
+
+.fourth-border {
+  border: solid 1px darkred;
+}

@@ -1,12 +1,12 @@
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import type { Game } from "../types/types";
+import { computePlayerStats } from "../helpers/calculate_stats";
 import { getTeamStyle } from "../helpers/team_styles";
 
-export const PlayerStatsModal = ({ selectedId, selectedName, isPlayers, games, computePlayerStats, onClose }: {
-        selectedId: string, selectedName: string, isPlayers: boolean, games: any[], computePlayerStats: (games: Game[], selectedId: string) => any, onClose: () => void
+export const PlayerStatsModal = ({ selectedId, selectedName, isPlayers, games, onClose }: {
+        selectedId: string, selectedName: string, isPlayers: boolean, games: any[], onClose: () => void
     }) => {
 
-    const stats = computePlayerStats(games, selectedId);
+    const stats: any = computePlayerStats(games, selectedId, isPlayers);
 
 	if (!games || games.length === 0 || !stats || stats.length === 0) return <p>No games found.</p>;
 
@@ -72,8 +72,8 @@ export const PlayerStatsModal = ({ selectedId, selectedName, isPlayers, games, c
                                 <img className="w-1/7" src={getTeamStyle(stats.mostPlayedTeam.name).icon} alt={`Image for Team ${stats.mostPlayedTeam.name}`} />
                             </div>
                             <div className="flex justify-center items-center space-x-2">
-                                <p className="text-sm">{stats.top2ByTeam?.count}</p>
-                                <p className="text-xs font-normal">({stats.top2ByTeam?.percent}%)</p>
+                                <p className="text-sm">{stats.mostPlayedTeam?.count}</p>
+                                <p className="text-xs font-normal">({stats.mostPlayedTeam?.percent}%)</p>
                             </div>
                         </div>
                         <div className="w-1/6 space-y-1">

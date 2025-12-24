@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { useData } from "../context/DataContext";
-import { GameCard } from "./GameCard";
+import { GameCard } from "../components/GameCard";
+import { filterGames } from "../helpers/alter_data";
 import type { Game, Player, Team, Filter } from "../types/types";
 
 export default function GameGrid() {
     const { tournaments, games, players, teams } = useData();
+    const [selectedPlayerId, setSelectedPlayerId] = useState<string>("all");
+    const [selectedTeamId, setSelectedTeamId] = useState<string>("all");
     const [currentFilters, setCurrentFilters] = useState<Filter>({ tournament: "all", player: "all", team: "all" });
     const [filteredGames, setFilteredGames] = useState<Game[]>([]);
     const [playerOptions, setPlayerOptions] = useState<Player[]>([]);
@@ -16,29 +19,26 @@ export default function GameGrid() {
         setLoading(true);
         setPlayerOptions([{ id: "all", first_name: "All", last_name: "Players" }, ...players])
         setTeamOptions([{ id: "all", name: "All Teams", color: "None" }, ...teams])
-        filterGames("tournament", tournaments[1].id)
+        changeFilters("tournament", tournaments[1].id)
         setLoading(false);
     }, [games]);
 
-    const filterGames = (filterToChange: keyof Filter, newSelection: string) => {
+    const changeFilters = (filterToChange: keyof Filter, newSelection: string) => {
+        if (filterToChange === "player" as keyof Filter) setSelectedPlayerId(newSelection);
+        else if (filterToChange === "team" as keyof Filter) setSelectedTeamId(newSelection);
+
         const copy = {...currentFilters};
         copy[filterToChange] = newSelection;
         setCurrentFilters(copy);
 
         const tournamentFilter = filterToChange === "tournament" ? newSelection : currentFilters.tournament;
-        const filteredByTournament = (tournamentFilter) === "all"
-            ? games
-            : games.filter((gp) => gp.tournament.id === tournamentFilter);
+        const filteredByTournament = filterGames("tournament", tournamentFilter, games)
         
         const playerFilter = filterToChange === "player" ? newSelection : currentFilters.player;
-        const filteredByPlayer = playerFilter === "all"
-            ? filteredByTournament
-            : filteredByTournament.filter((gp) => gp.players.some((player) => player.player.id === playerFilter));
+        const filteredByPlayer = filterGames("player", playerFilter, filteredByTournament)
         
         const teamFilter = filterToChange === "team" ? newSelection : currentFilters.team;
-        const filteredByTeam = teamFilter === "all"
-            ? filteredByPlayer
-            : filteredByPlayer.filter((gp) => gp.players.some((player) => player.team.id === teamFilter));
+        const filteredByTeam = filterGames("team", teamFilter, filteredByPlayer)
             
         setFilteredGames(filteredByTeam);
     }
@@ -58,7 +58,7 @@ export default function GameGrid() {
                     <select
                         className="border p-2 rounded bg-neutral-700"
                         value={currentFilters.tournament}
-                        onChange={(e) => filterGames("tournament", e.target.value)}
+                        onChange={(e) => changeFilters("tournament", e.target.value)}
                     >
                         {tournaments.map((tournament) => (
                             <option key={tournament.id} value={tournament.id}>
@@ -73,7 +73,7 @@ export default function GameGrid() {
                     <select
                         className="border p-2 rounded bg-neutral-700"
                         value={currentFilters.player}
-                        onChange={(e) => filterGames("player", e.target.value)}
+                        onChange={(e) => changeFilters("player", e.target.value)}
                     >
                         {playerOptions.map((player) => (
                             <option key={player.id} value={player.id}>
@@ -88,7 +88,7 @@ export default function GameGrid() {
                     <select
                         className="border p-2 rounded bg-neutral-700"
                         value={currentFilters.team}
-                        onChange={(e) => filterGames("team", e.target.value)}
+                        onChange={(e) => changeFilters("team", e.target.value)}
                     >
                         {teamOptions.map((team) => (
                             <option key={team.id} value={team.id}>
@@ -103,7 +103,7 @@ export default function GameGrid() {
             <div className="flex flex-wrap justify-center space-x-4 space-y-4">
 				{filteredGames.map((g, idx) => (
 					<div key={idx} className="w-[380px]">
-						<GameCard gameMeta={g} players={g.players} />
+						<GameCard gameMeta={g} players={g.players} selectedId={selectedPlayerId} secondarySelectedId={selectedTeamId} />
 					</div>
 				))}
 			</div>

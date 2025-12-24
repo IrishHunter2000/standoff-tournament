@@ -1,22 +1,22 @@
 import type { GamePlayer, Game } from "../types/types";
-import { formatUTCDate } from "../helpers/data_analysis";
+import { formatUTCDate } from "../helpers/alter_data";
 import { getTeamStyle } from "../helpers/team_styles";
 
-export const GameCard = ({ gameMeta, players, selectedId, isPlayers }: {
-        gameMeta: Game, players: GamePlayer[], selectedId?: string, isPlayers?: boolean
+export const GameCard = ({ gameMeta, players, selectedId, secondarySelectedId }: {
+        gameMeta: Game, players: GamePlayer[], selectedId?: string, secondarySelectedId?: string
     }) => {
 
     return (
         <div className="w-[380px] flex flex-col p-2 rounded-xl border border-gray-200">
             <p className="text-sm text-gray-500 text-center mb-2">
-                {gameMeta.tournament?.name} - Game #{gameMeta.game_number} - {formatUTCDate(gameMeta.created_at)}
+                {gameMeta.tournament?.name} - {gameMeta.round.name} - Game #{gameMeta.game_number} - {formatUTCDate(gameMeta.created_at)}
             </p>
 
             <div className="w-full">
                 {players.map((p: GamePlayer, i: number) => {
                     const teamName = p.team?.name ?? "Unknown";
                     const style = getTeamStyle(teamName);
-                    const highlightName = (selectedId && selectedId === (isPlayers ? p.player.id : p.team.id))
+                    const highlightName = ([String(p.player.id), String(p.team.id)].includes(selectedId || "") || [String(p.player.id), String(p.team.id)].includes(secondarySelectedId || ""))
                     
                     return (
                         <div

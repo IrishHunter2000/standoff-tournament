@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useData } from "../context/DataContext";
 import { useToast } from "../context/ToastContext";
 import { validateForm } from "../context/validation";
-import type { GamePlayerInput, Tournament } from "../types/types";
+import type { GamePlayerInput } from "../types/types";
 
 const createEmptyEntries = () => ([
   { player_id: null, team_id: null, health: null },
@@ -13,7 +13,7 @@ const createEmptyEntries = () => ([
 ]);
 
 export default function GameForm() {
-    const { players, teams, tournaments, loadUpdatedTables } = useData();
+    const { players, teams, currentTournament, loadUpdatedTables } = useData();
     const { showToast } = useToast();
 
     const [formData, setFormData] = useState<GamePlayerInput[]>([
@@ -22,13 +22,7 @@ export default function GameForm() {
         { player_id: null, team_id: null, health: null },
         { player_id: null, team_id: null, health: null },
     ]);
-    const [currentTournament, setCurrentTournament] = useState<Tournament | null>(null);
     const [errorMessages, setErrorMessages] = useState<string[]>([]);
-
-    useEffect(() => {
-        if (tournaments.length === 0) return;
-        setCurrentTournament(tournaments[1])
-    }, [tournaments]);
 
     const updateField = (
         index: number,
@@ -113,6 +107,8 @@ export default function GameForm() {
         setFormData(createEmptyEntries());
         setErrorMessages([]); // if you are storing validation errors
     };
+
+    if (!currentTournament.id) return <p>No active tournament to submit games for.</p>;
 
     return (
         <div className="mx-auto max-w-3xl p-6 bg-neutral-900 rounded-2xl shadow-xl">

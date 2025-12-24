@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import standoff_logo from "../assets/standoff_logo.png"
 
-export default function Header({ page, setPage }: {
-        page: string, setPage: React.Dispatch<React.SetStateAction<string>>
-    }) {
+export default function Header({ page, setPage }: { page: string, setPage: (page: string) => void }) {
 	const tabs = [
 		{ id: "home", label: "Home" },
 		{ id: "grid", label: "Games" },
 		{ id: "standings", label: "Standings" },
-		{ id: "form", label: "Submit a Game" }
+		{ id: "achieve", label: "Achievements" },
+		{ id: "form", label: "Submit Game" },
+		{ id: "admin", label: "Admin Console" }
 	];
 
 	return (

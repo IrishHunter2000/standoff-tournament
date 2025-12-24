@@ -1,6 +1,6 @@
 import type { Game, GamePlayer } from "../types/types";
 
-export const computePlayerStats = (games: Game[], playerId: string) => {
+export const computePlayerStats = (games: Game[], selectedId: string, isPlayers: boolean) => {
     let totalGames = games.length;
     let placements: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
     let totalPoints = 0;
@@ -24,41 +24,41 @@ export const computePlayerStats = (games: Game[], playerId: string) => {
     const progression: { game_number: number, points: number }[] = [];
 
     games.slice().reverse().forEach((game, index) => {
-        const playerEntry = game.players.find(p => p.player.id === playerId) as GamePlayer;
-        const placement = 5 - playerEntry.points;
+        const gamePlayerEntry = game.players.find(p => (isPlayers ? p.player.id : p.team.id) === selectedId) as GamePlayer;
+        const placement = 5 - gamePlayerEntry.points;
         const roundName = game.round?.name;
         if (!tournaments_played.includes(game.tournament.id)) tournaments_played.push(game.tournament.id)
 
         placements[placement]++;
-        totalPoints += playerEntry.points;
-        totalHP += playerEntry.remaining_health;
+        totalPoints += gamePlayerEntry.points;
+        totalHP += gamePlayerEntry.remaining_health;
 
-        const teamName = playerEntry.team.name;
+        const teamName = gamePlayerEntry.team.name;
         teamCount[teamName] = (teamCount[teamName] || 0) + 1;
         if (placement <= 2) {
-            const t = playerEntry.team.name;
+            const t = gamePlayerEntry.team.name;
             top2ByTeam[t] = (top2ByTeam[t] || 0) + 1;
             top2Order.push(t);
         } else {
-            const t = playerEntry.team.name;
+            const t = gamePlayerEntry.team.name;
             bottom2ByTeam[t] = (bottom2ByTeam[t] || 0) + 1;
             bottom2Order.push(t);
         }
         game.players.forEach(opponent => {
-            if (opponent.player.id !== playerId) {
+            if ((isPlayers ? opponent.player.id : opponent.team.id) !== selectedId) {
                 const t = opponent.team.name;
                 teamMatchupCount[t] = (teamMatchupCount[t] || 0) + 1;
-                if (opponent.points > playerEntry.points) {
+                if (opponent.points > gamePlayerEntry.points) {
                     lossesByTeam[t] = (lossesByTeam[t] || 0) + 1;
                     lossesTeamOrder.push(t);
                 }
             }
         });
         game.players.forEach(opponent => {
-            if (opponent.player.id !== playerId) {
+            if ((isPlayers ? opponent.player.id : opponent.team.id) !== selectedId) {
                 const name = opponent.player.first_name + " " + opponent.player.last_name;
                 playerMatchupCount[name] = (playerMatchupCount[name] || 0) + 1;
-                if (opponent.points > playerEntry.points) {
+                if (opponent.points > gamePlayerEntry.points) {
                     const id = opponent.player.id;
 
                     lossesByPlayer[id] = lossesByPlayer[id] || { name, count: 0 };
@@ -78,7 +78,7 @@ export const computePlayerStats = (games: Game[], playerId: string) => {
 
         progression.push({
             game_number: index + 1,
-            points: playerEntry.points
+            points: gamePlayerEntry.points
         });
     });
 
@@ -97,7 +97,7 @@ export const computePlayerStats = (games: Game[], playerId: string) => {
         commonPlace: commonPlace,
         avgPoints: Math.round((totalPoints / totalGames) * 100) / 100,
         avgHealth: Math.round((totalHP / totalGames) * 100) / 100,
-        mostPlayedTeam: { name: mostPlayedTeam[0], count: mostPlayedTeam[1] },
+        mostPlayedTeam: { name: mostPlayedTeam[0], count: mostPlayedTeam[1], percent: Math.round((mostPlayedTeam[1] / totalGames) * 100) },
         semifinals: semifinalsCount,
         semifinalsPCT: Math.round((semifinalsCount / tournaments_played.length) * 100),
         finals: finalsCount,

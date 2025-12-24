@@ -1,9 +1,34 @@
-import type { GamePlayer } from "../types/types";
+import type { Achievement, Game, GamePlayer } from "../types/types";
 
-export const filterStandings = (selectedTournament: string, gamePlayers: GamePlayer[]) => {
-    const filtered = selectedTournament === "all"
+export const filterGamePlayers = (filterValue: string, gamePlayers: GamePlayer[]) => {
+    const filtered = filterValue === "all"
         ? gamePlayers
-        : gamePlayers.filter((gp) => gp.game?.tournament_id === selectedTournament);
+        : gamePlayers.filter((gp) => gp.game?.tournament_id === filterValue);
+    return filtered
+}
+
+export const filterGames = (filterType: string, filterValue: string, games: Game[]) => {
+    let filtered: Game[] = []
+    if (filterType === "tournament") {
+        filtered = (filterValue) === "all"
+            ? games
+            : games.filter((gp) => gp.tournament.id === filterValue);
+    } else if (filterType === "player") {
+        filtered = filterValue === "all"
+            ? games
+            : games.filter((gp) => gp.players.some((player) => player.player.id === filterValue));
+    } else if (filterType === "team") {
+        filtered = filterValue === "all"
+            ? games
+            : games.filter((gp) => gp.players.some((player) => player.team.id === filterValue));
+    }
+    return filtered
+}
+
+export const filterAchievements = (filterValue: string, achievements: Achievement[]) => {
+    const filtered = filterValue === "all"
+        ? achievements
+        : achievements.filter((achievement) => achievement.players.some((player) => player.player.id === filterValue));
     return filtered
 }
 
@@ -43,6 +68,7 @@ export const sortStandings = (totals: any) => {
 };
 
 export const formatUTCDate = (dateString: string) => {
+    if (!dateString) return "";
     return new Intl.DateTimeFormat("en-US", {
         year: "numeric",
         month: "2-digit",

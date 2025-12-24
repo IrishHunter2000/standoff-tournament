@@ -52,13 +52,51 @@ export type Standings = {
     health: number;
 }
 
+export type Achievement = {
+    id: string;
+    name: string;
+    icon: string;
+    rarity: number;
+    description: string;
+    players: PlayerAchievement[];
+}
+
+export type PlayerAchievement = {
+    player: Player;
+    count: number;
+}
+
+export type AchievementFunction = (games: Game[]) => PlayerAchievement[]
+
+export type HomeCard = {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    color: string;
+    isNew?: boolean;
+    isAdminOnly?: boolean;
+}
+
+export type ConsistencyRule = (
+    playerEntry: any,
+    game: any
+) => boolean; // return TRUE if player FAILS the rule
+
 export type DataContextType = {
+    user: any;
+    loadingAuth: boolean;
     players: Player[];
     teams: Team[];
     games: Game[];
     gamePlayers: GamePlayer[];
     tournaments: Tournament[];
+    currentTournament: Tournament;
+    currentRound: Round;
+    achievements: Achievement[];
     loadUpdatedTables: () => Promise<void>;
+    loadTournaments: () => Promise<void>;
+    loadCurrentRound: () => Promise<void>;
 };
 
 export type GamePlayerInput = {

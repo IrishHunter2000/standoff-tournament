@@ -1,7 +1,7 @@
 import { GameCard } from "./GameCard";
 
-export const PlayerGamesModal = ({ selectedId, selectedName, isPlayers, games, onClose }: {
-        selectedId: string, selectedName: string, isPlayers: boolean, games: any[], onClose: () => void
+export const PlayerGamesModal = ({ selectedId, selectedName, games, onClose }: {
+        selectedId: string, selectedName: string, games: any[], onClose: () => void
     }) => {
 
 	if (!games || games.length === 0) return <p>No games found.</p>;
@@ -14,7 +14,7 @@ export const PlayerGamesModal = ({ selectedId, selectedName, isPlayers, games, o
                 <div className="max-h-[640px] flex flex-wrap justify-center gap-4 overflow-auto">
                     {games.map((g, idx) => (
                         <div key={idx} className="w-[380px] h-[200px]">
-                            <GameCard gameMeta={g} players={g.players} selectedId={selectedId} isPlayers={isPlayers} />
+                            <GameCard gameMeta={g} players={g.players} selectedId={selectedId} />
                         </div>
                     ))}
                 </div>

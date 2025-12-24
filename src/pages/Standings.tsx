@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { PlayerGamesModal } from "./PlayerGamesModal";
-import { PlayerStatsModal } from "./PlayerStatsModal";
+import { PlayerGamesModal } from "../components/PlayerGamesModal";
+import { PlayerStatsModal } from "../components/PlayerStatsModal";
 import { useData } from "../context/DataContext";
 import type { Game, Standings } from "../types/types";
-import { filterStandings, totalStandings, sortStandings } from "../helpers/data_analysis";
-import { computePlayerStats } from "../helpers/calculate_stats";
+import { filterGamePlayers, totalStandings, sortStandings } from "../helpers/alter_data";
 
 export default function StandingsPage() {
     const { games, gamePlayers, tournaments } = useData();
@@ -17,7 +16,7 @@ export default function StandingsPage() {
     const [playerStandings, setPlayerStandings] = useState<Standings[]>([]);
     const [teamStandings, setTeamStandings] = useState<Standings[]>([]);
     const [standings, setStandings] = useState<Standings[]>([]);
-    const [currentTournament, setCurrentTournament] = useState("all");
+    const [tournamentFilter, setTournamentFilter] = useState("all");
 	const [subPage, setSubPage] = useState("players");
     const [isPlayers, setIsPlayers] = useState(true);
 	const tabs = [
@@ -27,18 +26,18 @@ export default function StandingsPage() {
 
     useEffect(() => {
         if (gamePlayers.length === 0) return;
-        calculateStandings(tournaments[1].id)
+        calculateStandings(tournaments[1]?.id)
     }, [gamePlayers]);
 
     const calculateStandings = (selectedTournament: string) => {
-        const filtered = filterStandings(selectedTournament, gamePlayers)
+        const filtered = filterGamePlayers(selectedTournament, gamePlayers)
         const { player_totals, team_totals } = totalStandings(filtered);
         const player_sorted = sortStandings(player_totals);
         setPlayerStandings(player_sorted);
         const team_sorted = sortStandings(team_totals);
         setTeamStandings(team_sorted);
         setStandings(isPlayers ? player_sorted : team_sorted)
-        setCurrentTournament(selectedTournament);
+        setTournamentFilter(selectedTournament);
     }
 
     const handleSubPage = (tabId: string) => {
@@ -110,13 +109,13 @@ export default function StandingsPage() {
                     <label className="text-sm text-gray-700">Tournaments</label>
                     <select
                         className="border p-2 rounded bg-neutral-700"
-                        value={currentTournament}
+                        value={tournamentFilter}
                         onChange={(e) => calculateStandings(e.target.value)}
                     >
                         {tournaments.map((t) => (
-                        <option key={t.id} value={t.id}>
-                            {t.name}
-                        </option>
+                            <option key={t.id} value={t.id}>
+                                {t.name}
+                            </option>
                         ))}
                     </select>
                 </div>
@@ -156,11 +155,10 @@ export default function StandingsPage() {
                             </p>
                             <p
                                 className="w-1/8 cursor-pointer text-xs text-gray-600"
-                                onClick={() => openModal(p.id, "stats", p.first_name + " " + p.last_name)}
+                                onClick={() => openModal(p.id, "stats", isPlayers ? p.first_name + " " + p.last_name : "(" + p.team_color + " Team) " + p.team_name)}
                             >
                                 View Stats
                             </p>
-
                         </div>
                     )
                 })}
@@ -169,7 +167,6 @@ export default function StandingsPage() {
                 <PlayerGamesModal
                     selectedId={selectedId}
                     selectedName={selectedName}
-                    isPlayers={isPlayers}
                     games={playerGames}
                     onClose={closeModal}
                 />
@@ -180,7 +177,6 @@ export default function StandingsPage() {
                     selectedName={selectedName}
                     isPlayers={isPlayers}
                     games={playerGames}
-                    computePlayerStats={computePlayerStats}
                     onClose={closeModal}
                 />
             )}
