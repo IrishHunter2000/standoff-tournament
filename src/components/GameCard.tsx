@@ -7,7 +7,7 @@ export const GameCard = ({ gameMeta, players, selectedId, secondarySelectedId }:
     }) => {
 
     return (
-        <div className="w-[380px] flex flex-col p-2 rounded-xl border border-gray-200">
+        <div className="w-full max-w-[380px] flex flex-col p-2 rounded-xl border border-gray-200">
             <p className="text-sm text-gray-500 text-center mb-2">
                 {gameMeta.tournament?.name} - {gameMeta.round.name} - Game #{gameMeta.game_number} - {formatUTCDate(gameMeta.created_at)}
             </p>
@@ -24,7 +24,7 @@ export const GameCard = ({ gameMeta, players, selectedId, secondarySelectedId }:
                             className={`flex justify-around items-center text-left py-1 rounded ${highlightName && 'bg-red-500/20 border border-red-900'}`}
                         >
                             <img className="w-1/12" src={style.icon} alt={`Image for Team ${teamName}`} />
-                            <p className="w-1/3 font-semibold">
+                            <p className="w-[120px] font-semibold">
                                 {p.player?.first_name} {p.player?.last_name}
                             </p>
                             <p className={`w-1/6 font-bold place ${i === 0 && "first"} ${i === 1 && "second"} ${i === 2 && "third"}`}>+{p.points} pt{p.points !== 1 ? "s" : ""}</p>

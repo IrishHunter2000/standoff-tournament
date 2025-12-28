@@ -49,13 +49,7 @@ export default function HomeCard({ card, setPage }: { card: HomeCard, setPage: (
     )
 }
 
-function Badge({
-    text,
-    color,
-}: {
-    text: string;
-    color: string;
-}) {
+function Badge({ text, color }: { text: string; color: string }) {
     return (
         <span
             className={`text-xs px-2 py-0.5 rounded-full text-white font-semibold ${color}`}

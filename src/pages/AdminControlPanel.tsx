@@ -226,7 +226,7 @@ export default function AdminControlPanel() {
                             <div className="flex justify-around items-center">
                                 <input
                                     disabled={loading || Object.entries(currentTournament).length !== 0}
-                                    className="w-1/3 p-2 rounded bg-neutral-700"
+                                    className="md:w-1/3 p-2 rounded bg-neutral-700"
                                     placeholder="Tournament name"
                                     value={newTournamentName}
                                     onChange={(e) => setNewTournamentName(e.target.value)}
@@ -236,14 +236,16 @@ export default function AdminControlPanel() {
                                     onClick={startNewTournament}
                                     className="rounded-lg bg-green-600 py-2 font-semibold disabled:opacity-50"
                                 >
-                                    Start Tournament
+                                    <span className="md:hidden">Start</span>
+                                    <span className="hidden md:inline">Start Tournament</span>
                                 </button>
                                 <button
                                     disabled={loading || Object.entries(currentTournament).length === 0}
                                     onClick={endTournament}
                                     className="rounded-lg bg-red-800! py-2 font-semibold disabled:opacity-50"
                                 >
-                                    End Tournament
+                                    <span className="md:hidden">End</span>
+                                    <span className="hidden md:inline">End Tournament</span>
                                 </button>
                             </div>
                         </div>
@@ -255,7 +257,7 @@ export default function AdminControlPanel() {
                             <div className="flex justify-around items-center">
                                 <input
                                     disabled={loading || Object.entries(currentRound).length !== 0 || Object.entries(currentTournament).length === 0}
-                                    className="w-1/3 p-2 rounded bg-neutral-700"
+                                    className="md:w-1/3 p-2 rounded bg-neutral-700"
                                     placeholder="Round name"
                                     value={newRoundName}
                                     onChange={(e) => setNewRoundName(e.target.value)}
@@ -265,14 +267,16 @@ export default function AdminControlPanel() {
                                     onClick={startNewRound}
                                     className="rounded-lg bg-blue-600 py-2 font-semibold disabled:opacity-50"
                                 >
-                                    Start New Round
+                                    <span className="md:hidden">Start</span>
+                                    <span className="hidden md:inline">Start New Round</span>
                                 </button>
                                 <button
                                     disabled={loading || Object.entries(currentRound).length === 0}
                                     onClick={endCurrentRound}
                                     className="rounded-lg bg-red-800! py-2 font-semibold disabled:opacity-50"
                                 >
-                                    End Current Round
+                                    <span className="md:hidden">End</span>
+                                    <span className="hidden md:inline">End Current Round</span>
                                 </button>
                             </div>
                         </div>
@@ -283,7 +287,7 @@ export default function AdminControlPanel() {
                         {calculatedAchievements.length !== 0 && Object.entries(currentTournament).length !== 0 ?
                             <div>
                                 {/* Achievements List */}
-                                <div className="columns-5 gap-3 w-[1270px]">
+                                <div className="md:columns-5 md:w-[1270px]">
                                     {calculatedAchievements.map((achievement) => (
                                         <AchievementCard key={achievement.name} achievement={achievement} />
                                     ))}
