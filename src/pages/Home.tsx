@@ -33,10 +33,10 @@ export default function RecentGame({ setPage }: { setPage: (p: string) => void }
 			<div className="h-[56px] flex justify-center items-center mb-8">
 				{(tournaments.length > 1 && players.length !== 0 && games.length !== 0 && numAchievements !== 0) ?
 					<div className="flex gap-6">
-						<Stat label="Tournaments" value={tournaments.length - 1} />
-						<Stat label="Players" value={players.length} />
-						<Stat label="Games" value={games.length} />
-						<Stat label="Achievements" value={numAchievements} />
+						<HomeStat label="Tournaments" value={tournaments.length - 1} />
+						<HomeStat label="Players" value={players.length} />
+						<HomeStat label="Games" value={games.length} />
+						<HomeStat label="Achievements" value={numAchievements} />
 					</div>
 					: <div>Retrieving statistics...</div>
 				}
@@ -49,9 +49,9 @@ export default function RecentGame({ setPage }: { setPage: (p: string) => void }
                 animate="show"
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl"
             >
-                {home_cards.map((card) => (
-					<HomeCard card={card} setPage={setPage} />
-                ))};
+                {home_cards.map((card, index) => (
+					<HomeCard key={index} card={card} setPage={setPage} />
+                ))}
             </motion.div>
 
 			<h2 className="text-2xl font-bold mt-8 mb-4 text-center">Most Recent Game</h2>
@@ -60,7 +60,7 @@ export default function RecentGame({ setPage }: { setPage: (p: string) => void }
 	);
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function HomeStat({ label, value }: { label: string; value: number }) {
     return (
         <div className="text-center">
             <div className="text-3xl font-bold">{value}</div>

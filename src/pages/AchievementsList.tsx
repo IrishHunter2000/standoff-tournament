@@ -3,6 +3,7 @@ import { useData } from "../context/DataContext";
 import type { Achievement, Player } from "../types/types";
 import { AchievementCard } from "../components/AchievementCard";
 import { filterAchievements } from "../helpers/alter_data";
+import { FilterDropdown } from "../components/FilterDropdown";
 
 export default function Achievements() {
     const { achievements, players } = useData();
@@ -16,7 +17,7 @@ export default function Achievements() {
     }, [achievements]);
 
     const changeFilter = (newSelection: string) => {
-        setCurrentPlayer(newSelection)
+        setCurrentPlayer(newSelection);
         
         const filteredByPlayer = filterAchievements(newSelection, achievements)
             
@@ -27,32 +28,24 @@ export default function Achievements() {
     if (!achievements || achievements.length === 0) return <p>No achievements found.</p>;
 
     return (
-		<div className="flex justify-center items-center gap-8">
+		<div className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8">
             <div className="flex flex-col items-center gap-4">
                 <div className="flex gap-4">
                     <div className="flex items-center uppercase font-semibold text-gray-500">
                         Filters:
                     </div>
-                    {/* Tournament Filter */}
-                    <div className="flex flex-col text-left">
-                        <label className="text-sm text-gray-700">Players</label>
-                        <select
-                            className="border p-2 rounded bg-neutral-700"
-                            value={currentPlayer}
-                            onChange={(e) => changeFilter(e.target.value)}
-                        >
-                            {playerOptions.map((player) => (
-                                <option key={player.id} value={player.id}>
-                                    {player.first_name} {player.last_name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {/* Player Filter */}
+                    <FilterDropdown
+                        filterTitle="Players"
+                        filterValue={currentPlayer}
+                        filterOptions={playerOptions}
+                        changeFilter={changeFilter}
+                    />
                 </div>
 
                 {/* Achievements List */}
                 {filteredAchievements.length !== 0 ?
-                    <div className="columns-5 gap-3 w-[1270px]">
+                    <div className="md:columns-5 md:w-[1270px]">
                         {filteredAchievements.map((achievement) => {
                             if (achievement.players.length === 0) return null;
                             else return <AchievementCard key={achievement.name} achievement={achievement} selectedPlayer={currentPlayer} />
@@ -65,7 +58,7 @@ export default function Achievements() {
             <div className="flex flex-col items-center p-3 gap-4 bg-black rounded-lg">
                 <h2 className="text-xl">Achievements not yet earned</h2>
                 <div className="gap-3">
-                    {filteredAchievements.map((achievement) => {
+                    {achievements.map((achievement) => {
                         if (achievement.players.length !== 0) return null;
                         else return <AchievementCard key={achievement.name} achievement={achievement} selectedPlayer={currentPlayer} />
                     })}

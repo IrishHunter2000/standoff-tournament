@@ -3,6 +3,7 @@ import { useData } from "../context/DataContext";
 import { GameCard } from "../components/GameCard";
 import { filterGames } from "../helpers/alter_data";
 import type { Game, Player, Team, Filter } from "../types/types";
+import { FilterDropdown } from "../components/FilterDropdown";
 
 export default function GameGrid() {
     const { tournaments, games, players, teams } = useData();
@@ -13,15 +14,28 @@ export default function GameGrid() {
     const [playerOptions, setPlayerOptions] = useState<Player[]>([]);
     const [teamOptions, setTeamOptions] = useState<Team[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [filtersOpen, setFiltersOpen] = useState(false);
 
     useEffect(() => {
         if (tournaments.length === 0) return;
         setLoading(true);
         setPlayerOptions([{ id: "all", first_name: "All", last_name: "Players" }, ...players])
         setTeamOptions([{ id: "all", name: "All Teams", color: "None" }, ...teams])
-        changeFilters("tournament", tournaments[1].id)
+        changeTournamentFilter(tournaments[1].id)
         setLoading(false);
     }, [games]);
+
+    const changeTournamentFilter = (newSelection: string) => {
+        changeFilters("tournament", newSelection);
+    }
+
+    const changePlayerFilter = (newSelection: string) => {
+        changeFilters("player", newSelection);
+    }
+    
+    const changeTeamFilter = (newSelection: string) => {
+        changeFilters("team", newSelection);
+    }
 
     const changeFilters = (filterToChange: keyof Filter, newSelection: string) => {
         if (filterToChange === "player" as keyof Filter) setSelectedPlayerId(newSelection);
@@ -39,7 +53,8 @@ export default function GameGrid() {
         
         const teamFilter = filterToChange === "team" ? newSelection : currentFilters.team;
         const filteredByTeam = filterGames("team", teamFilter, filteredByPlayer)
-            
+        
+        if (window.innerWidth < 768) setFiltersOpen(false);
         setFilteredGames(filteredByTeam);
     }
 
@@ -48,61 +63,52 @@ export default function GameGrid() {
 
     return (
 		<div className="flex flex-col justify-center items-center">
-		    <div className="flex gap-4 mb-4">
-                <div className="flex items-center uppercase font-semibold text-gray-500">
-                    Filters:
-                </div>
-                {/* Tournament Filter */}
-                <div className="flex flex-col text-left">
-                    <label className="text-sm text-gray-700">Tournaments</label>
-                    <select
-                        className="border p-2 rounded bg-neutral-700"
-                        value={currentFilters.tournament}
-                        onChange={(e) => changeFilters("tournament", e.target.value)}
-                    >
-                        {tournaments.map((tournament) => (
-                            <option key={tournament.id} value={tournament.id}>
-                                {tournament.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                {/* Player Filter */}
-                <div className="flex flex-col text-left">
-                    <label className="text-sm text-gray-700">Players</label>
-                    <select
-                        className="border p-2 rounded bg-neutral-700"
-                        value={currentFilters.player}
-                        onChange={(e) => changeFilters("player", e.target.value)}
-                    >
-                        {playerOptions.map((player) => (
-                            <option key={player.id} value={player.id}>
-                                {player.first_name} {player.last_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                {/* Team Filter */}
-                <div className="flex flex-col text-left">
-                    <label className="text-sm text-gray-700">Teams</label>
-                    <select
-                        className="border p-2 rounded bg-neutral-700"
-                        value={currentFilters.team}
-                        onChange={(e) => changeFilters("team", e.target.value)}
-                    >
-                        {teamOptions.map((team) => (
-                            <option key={team.id} value={team.id}>
-                                {team.name} {team.color !== "None" ? "(" + team.color + ")" : ""}
-                            </option>
-                        ))}
-                    </select>
+            <button
+                className="md:hidden flex items-center justify-between w-full text-white"
+                onClick={() => setFiltersOpen(!filtersOpen)}
+            >
+                <span className="font-semibold">Filters</span>
+                <span>{filtersOpen ? "▲" : "▼"}</span>
+            </button>
+            <div
+                className={`
+                    overflow-hidden transition-all duration-300 mb-4 bg-black w-full
+                    ${filtersOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}
+                    md:max-h-none md:opacity-100 md:bg-transparent md:w-auto
+                `}
+            >
+                <div className="flex flex-col md:flex-row gap-x-4 gap-y-2 mt-2 px-4 pb-4 md:mt-0 md:p-0">
+                    <div className="hidden md:flex items-center uppercase font-semibold text-gray-500">
+                        Filters:
+                    </div>
+                    {/* Tournament Filter */}
+                    <FilterDropdown
+                        filterTitle="Tournaments"
+                        filterValue={currentFilters.tournament}
+                        filterOptions={tournaments}
+                        changeFilter={changeTournamentFilter}
+                    />
+                    {/* Player Filter */}
+                    <FilterDropdown
+                        filterTitle="Players"
+                        filterValue={currentFilters.player}
+                        filterOptions={playerOptions}
+                        changeFilter={changePlayerFilter}
+                    />
+                    {/* Team Filter */}
+                    <FilterDropdown
+                        filterTitle="Teams"
+                        filterValue={currentFilters.team}
+                        filterOptions={teamOptions}
+                        changeFilter={changeTeamFilter}
+                    />
                 </div>
             </div>
 
             {/* Games List */}
-            <div className="flex flex-wrap justify-center space-x-4 space-y-4">
+            <div className="flex flex-wrap justify-center gap-4">
 				{filteredGames.map((g, idx) => (
-					<div key={idx} className="w-[380px]">
+					<div key={idx}>
 						<GameCard gameMeta={g} players={g.players} selectedId={selectedPlayerId} secondarySelectedId={selectedTeamId} />
 					</div>
 				))}

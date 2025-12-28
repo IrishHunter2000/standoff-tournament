@@ -13,7 +13,7 @@ const createEmptyEntries = () => ([
 ]);
 
 export default function GameForm() {
-    const { players, teams, currentTournament, loadUpdatedTables } = useData();
+    const { players, teams, currentTournament, currentRound, loadUpdatedTables } = useData();
     const { showToast } = useToast();
 
     const [formData, setFormData] = useState<GamePlayerInput[]>([
@@ -55,6 +55,7 @@ export default function GameForm() {
                 {
                 tournament_id: currentTournament.id,
                 game_number: newGameNumber,
+                round_id: currentRound.id
                 },
             ])
             .select()
@@ -108,7 +109,8 @@ export default function GameForm() {
         setErrorMessages([]); // if you are storing validation errors
     };
 
-    if (!currentTournament.id) return <p>No active tournament to submit games for.</p>;
+    console.log(currentRound)
+    if (!currentTournament.id || !currentRound.id) return <p>No active tournament or round. No games can be submitted until a tournament has begun and a round is active.</p>;
 
     return (
         <div className="mx-auto max-w-3xl p-6 bg-neutral-900 rounded-2xl shadow-xl">
@@ -136,16 +138,16 @@ export default function GameForm() {
                 const selectedTeamIds = formData.map((p) => p.team_id)
 
                 return (
-                    <div key={i} className="h-15 flex justify-center gap-6 bg-neutral-800 p-2 mb-2 rounded-xl border border-neutral-700">
+                    <div key={i} className="md:h-15 flex flex-col md:flex-row justify-center items-center md:items-stretch gap-2 md:gap-6 bg-neutral-800 p-2 mb-2 rounded-xl border border-neutral-700">
                         <h3 className={
-                            `w-1/15 place text-md font-semibold ${i === 0 && "first"} ${i === 1 && "second"} ${i === 2 && "third"}`
+                            `md:w-1/15 place text-md font-semibold ${i === 0 && "first"} ${i === 1 && "second"} ${i === 2 && "third"}`
                         }>
                             {i+1}{i === 0 ? "st" : i === 1 ? "nd" : i === 2 ? "rd" : "th"} Place
                         </h3>
 
                         {/* PLAYER SELECT */}
                         <select
-                            className="w-1/4 p-2 rounded bg-neutral-700 text-white"
+                            className="w-5/6 md:w-1/4 p-2 rounded bg-neutral-700 text-white"
                             value={entry.player_id ?? ""}
                             onChange={(e) => updateField(i, "player_id", String(e.target.value))}
                         >
@@ -170,7 +172,7 @@ export default function GameForm() {
 
                         {/* TEAM SELECT */}
                         <select
-                            className="w-1/3 p-2 rounded bg-neutral-700 text-white"
+                            className="w-5/6 md:w-1/3 p-2 rounded bg-neutral-700 text-white"
                             value={entry.team_id ?? ""}
                             onChange={(e) => updateField(i, "team_id", String(e.target.value))}
                         >
@@ -196,7 +198,7 @@ export default function GameForm() {
                         {/* HEALTH */}
                         <input
                             type="number"
-                            className="w-1/5 p-2 rounded bg-neutral-700 text-white"
+                            className="w-5/6 md:w-1/5 p-2 rounded bg-neutral-700 text-white"
                             placeholder="Health (0–20)"
                             min={0}
                             max={20}
@@ -209,13 +211,13 @@ export default function GameForm() {
 
             <button
                 onClick={resetForm}
-                className="w-1/5 mt-2 mr-4 p-3 reset-form-button"
+                className="md:w-1/5 mt-2 mr-4 p-3 reset-form-button"
             >
                 Reset Form
             </button>
             <button
                 onClick={handleSubmit}
-                className="w-1/5 mt-2 p-3"
+                className="md:w-1/5 mt-2 p-3"
             >
                 Submit Game
             </button>

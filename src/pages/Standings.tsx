@@ -5,6 +5,8 @@ import { PlayerStatsModal } from "../components/PlayerStatsModal";
 import { useData } from "../context/DataContext";
 import type { Game, Standings } from "../types/types";
 import { filterGamePlayers, totalStandings, sortStandings } from "../helpers/alter_data";
+import { FilterDropdown } from "../components/FilterDropdown";
+import { StandingsCard } from "../components/StandingsCard";
 
 export default function StandingsPage() {
     const { games, gamePlayers, tournaments } = useData();
@@ -29,6 +31,12 @@ export default function StandingsPage() {
         calculateStandings(tournaments[1]?.id)
     }, [gamePlayers]);
 
+    useEffect(() => {
+        const overflowStyle = selectedId ? "hidden" : "";
+        document.body.style.overflow = overflowStyle;
+        return () => { document.body.style.overflow = "" };
+    }, [selectedId]);
+
     const calculateStandings = (selectedTournament: string) => {
         const filtered = filterGamePlayers(selectedTournament, gamePlayers)
         const { player_totals, team_totals } = totalStandings(filtered);
@@ -46,13 +54,6 @@ export default function StandingsPage() {
         setIsPlayers(isPagePlayers);
         setStandings(isPagePlayers ? playerStandings : teamStandings)
     }
-
-    const medalForIndex = (index: number) => {
-        if (index === 0) return "🥇";
-        if (index === 1) return "🥈";
-        if (index === 2) return "🥉";
-        return null;
-    };
 
     const openModal = async (id: string, type: string, name: string) => {
         setSelectedId(id);
@@ -77,9 +78,9 @@ export default function StandingsPage() {
 
     return (
 		<div className="flex flex-col justify-center items-center">
-		    <div className="flex gap-4 mb-4">
+		    <div className="flex md:gap-4 mb-4">
                 {/* TABS */}
-                <div className="flex justify-center items-center gap-4 mr-4 text-lg font-medium">
+                <div className="flex justify-center items-center gap-3 mr-3 md:gap-4 md:mr-4 text-lg font-medium">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -101,67 +102,28 @@ export default function StandingsPage() {
                         </button>
                     ))}
                 </div>
-                <div className="flex items-center uppercase font-semibold text-gray-500">
+                <div className="hidden md:flex items-center uppercase font-semibold text-gray-500">
                     Filters:
                 </div>
                 {/* Tournament Filter */}
-                <div className="flex flex-col text-left">
-                    <label className="text-sm text-gray-700">Tournaments</label>
-                    <select
-                        className="border p-2 rounded bg-neutral-700"
-                        value={tournamentFilter}
-                        onChange={(e) => calculateStandings(e.target.value)}
-                    >
-                        {tournaments.map((t) => (
-                            <option key={t.id} value={t.id}>
-                                {t.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <FilterDropdown
+                    filterTitle="Tournaments"
+                    filterValue={tournamentFilter}
+                    filterOptions={tournaments}
+                    changeFilter={calculateStandings}
+                />
             </div>
 
             {/* Standings List */}
-            <div className={`space-y-2 ${isPlayers ? 'w-[390px]' : 'w-[440px]'}`}>
-                {standings.map((p, index) => {
-                    const medal = medalForIndex(index)
-                    
-                    return (
-                        <div
-                            key={p.id}
-                            className={`flex justify-between items-center p-2 rounded-xl shadow ${index === 0 && "first-border"} ${index === 1 && "second-border"} ${index === 2 && "third-border"}`}
-                        >
-                            {medal && <span className="w-[40px] text-2xl">
-                                {medal}
-                            </span>}
-                            {!medal && <span className="w-[40px] font-medium">
-                                {index + 1}
-                            </span>}
-                            {isPlayers ? (
-                                <span className="w-[170px] ml-[10px] text-left font-semibold">
-                                    {p.first_name} {p.last_name}
-                                </span>
-                            ) : (
-                                <span className="w-[250px] ml-[10px] text-left font-semibold">
-                                    {p.team_name} ({p.team_color})
-                                </span>
-                            )}
-                            <span className="w-[80px] font-bold">{p.points} pts</span>
-                            <p
-                                className="w-1/8 cursor-pointer text-xs text-gray-600"
-                                onClick={() => openModal(p.id, "games", isPlayers ? p.first_name + " " + p.last_name : "(" + p.team_color + " Team) " + p.team_name)}
-                            >
-                                View Games
-                            </p>
-                            <p
-                                className="w-1/8 cursor-pointer text-xs text-gray-600"
-                                onClick={() => openModal(p.id, "stats", isPlayers ? p.first_name + " " + p.last_name : "(" + p.team_color + " Team) " + p.team_name)}
-                            >
-                                View Stats
-                            </p>
-                        </div>
-                    )
-                })}
+            <div className="space-y-2">
+                {standings.map((standing, index) => (
+                    <StandingsCard 
+                        standing={standing}
+                        index={index}
+                        isPlayers={isPlayers}
+                        openModal={openModal}
+                    />
+                ))}
             </div>
             {selectedId && modalType === "games" && (
                 <PlayerGamesModal
