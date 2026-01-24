@@ -49,6 +49,8 @@ export type Standings = {
     team_name?: string;
     team_color?: string;
     points: number;
+    place: number;
+    games: number;
     health: number;
 }
 

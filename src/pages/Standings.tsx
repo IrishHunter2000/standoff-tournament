@@ -17,14 +17,15 @@ export default function StandingsPage() {
     const [playerGames, setPlayerGames] = useState<Game[]>([]);
     const [playerStandings, setPlayerStandings] = useState<Standings[]>([]);
     const [teamStandings, setTeamStandings] = useState<Standings[]>([]);
+    const [playerTotals, setPlayerTotals] = useState<any>({});
+    const [teamTotals, setTeamTotals] = useState<any>({});
     const [standings, setStandings] = useState<Standings[]>([]);
     const [tournamentFilter, setTournamentFilter] = useState("all");
 	const [subPage, setSubPage] = useState("players");
     const [isPlayers, setIsPlayers] = useState(true);
-	const tabs = [
-		{ id: "players", label: "Players" },
-		{ id: "teams", label: "Teams" }
-	];
+	const tabs = [{ id: "players", label: "Players" }, { id: "teams", label: "Teams" }];
+    const orderOptions = [{ id: "points", name: "Total Points" }, { id: "place", name: "Average Placement" }];
+    const [orderByMetric, setOrderByMetric] = useState("points");
 
     useEffect(() => {
         if (gamePlayers.length === 0) return;
@@ -40,12 +41,23 @@ export default function StandingsPage() {
     const calculateStandings = (selectedTournament: string) => {
         const filtered = filterGamePlayers(selectedTournament, gamePlayers)
         const { player_totals, team_totals } = totalStandings(filtered);
-        const player_sorted = sortStandings(player_totals);
+        setPlayerTotals(player_totals);
+        setTeamTotals(team_totals);
+        const player_sorted = sortStandings(player_totals, orderByMetric);
         setPlayerStandings(player_sorted);
-        const team_sorted = sortStandings(team_totals);
+        const team_sorted = sortStandings(team_totals, orderByMetric);
         setTeamStandings(team_sorted);
         setStandings(isPlayers ? player_sorted : team_sorted)
         setTournamentFilter(selectedTournament);
+    }
+
+    const calculateOrdering = (selectedOrdering: string) => {
+        const player_sorted = sortStandings(playerTotals, selectedOrdering);
+        setPlayerStandings(player_sorted);
+        const team_sorted = sortStandings(teamTotals, selectedOrdering);
+        setTeamStandings(team_sorted);
+        setStandings(isPlayers ? player_sorted : team_sorted)
+        setOrderByMetric(selectedOrdering);
     }
 
     const handleSubPage = (tabId: string) => {
@@ -74,11 +86,10 @@ export default function StandingsPage() {
     };
 
     if (!gamePlayers || gamePlayers.length === 0) return <p>Retrieving standings now...</p>;
-	if (!standings) return <p>No standings found.</p>;
 
     return (
 		<div className="flex flex-col justify-center items-center">
-		    <div className="flex md:gap-4 mb-4">
+		    <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:gap-4 mb-4">
                 {/* TABS */}
                 <div className="flex justify-center items-center gap-3 mr-3 md:gap-4 md:mr-4 text-lg font-medium">
                     {tabs.map((tab) => (
@@ -102,29 +113,40 @@ export default function StandingsPage() {
                         </button>
                     ))}
                 </div>
-                <div className="hidden md:flex items-center uppercase font-semibold text-gray-500">
-                    Filters:
+                <div className="flex gap-4">
+                    {/* Tournament Filter */}
+                    <FilterDropdown
+                        filterTitle="Tournament Filter"
+                        filterValue={tournamentFilter}
+                        filterOptions={tournaments}
+                        changeFilter={calculateStandings}
+                    />
+                    {/* Metric Ordering */}
+                    <FilterDropdown
+                        filterTitle="Order By Metric"
+                        filterValue={orderByMetric}
+                        filterOptions={orderOptions}
+                        changeFilter={calculateOrdering}
+                    />
                 </div>
-                {/* Tournament Filter */}
-                <FilterDropdown
-                    filterTitle="Tournaments"
-                    filterValue={tournamentFilter}
-                    filterOptions={tournaments}
-                    changeFilter={calculateStandings}
-                />
             </div>
 
             {/* Standings List */}
-            <div className="space-y-2">
-                {standings.map((standing, index) => (
-                    <StandingsCard 
-                        standing={standing}
-                        index={index}
-                        isPlayers={isPlayers}
-                        openModal={openModal}
-                    />
-                ))}
-            </div>
+            {!standings?.length
+                ? <p>No standings found.</p>
+                : <div className="space-y-2">
+                    {standings.map((standing, index) => (
+                        <StandingsCard
+                            key={index}
+                            standing={standing}
+                            index={index}
+                            isPlayers={isPlayers}
+                            orderByMetric={orderByMetric}
+                            openModal={openModal}
+                        />
+                    ))}
+                </div>
+            }
             {selectedId && modalType === "games" && (
                 <PlayerGamesModal
                     selectedId={selectedId}

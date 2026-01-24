@@ -1,7 +1,7 @@
 import type { Standings } from "../types/types";
 
-export const StandingsCard = ({ standing, index, isPlayers, openModal }: {
-        standing: Standings, index: number, isPlayers: boolean, openModal: (id: string, type: string, value: string) => void
+export const StandingsCard = ({ standing, index, isPlayers, orderByMetric, openModal }: {
+        standing: Standings, index: number, isPlayers: boolean, orderByMetric: string, openModal: (id: string, type: string, value: string) => void
     }) => {
 
     const medalIcons = ["🥇", "🥈", "🥉"];
@@ -27,7 +27,9 @@ export const StandingsCard = ({ standing, index, isPlayers, openModal }: {
             <span className={`w-full max-w-[170px] ${nameMaxWidth} ml-[10px] text-left font-semibold`}>
                 {standingName}
             </span>
-            <span className="w-[80px] font-bold">{standing.points} pts</span>
+            <span className="w-[80px] font-bold">
+                {orderByMetric === "points" ? `${standing.points} pts` : `${(standing.place / standing.games).toFixed(2)}`}
+            </span>
             <p
                 className="w-1/8 cursor-pointer text-xs text-gray-600"
                 onClick={() => openModal(standing.id, "games", standingName)}

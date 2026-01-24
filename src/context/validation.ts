@@ -14,19 +14,10 @@ export const validateForm = (formData: GamePlayerInput[]): ValidationResult => {
             errors.push(`Row ${rowNum}: Team must be selected.`);
         }
 
-        if (
-            entry.health === null ||
-            entry.health < 0 ||
-            entry.health > 20
-        ) {
-            errors.push(
-                `Row ${rowNum}: Health must be between 0 and 20.`
-            );
+        if (entry.health === null || entry.health < 0 || entry.health > 20) {
+            errors.push(`Row ${rowNum}: Health must be between 0 and 20.`);
         }
     });
 
-    return {
-        valid: errors.length === 0,
-        errors,
-    };
+    return { valid: errors.length === 0, errors };
 };

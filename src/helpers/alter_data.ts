@@ -44,25 +44,42 @@ export const totalStandings = (data: any) => {
         const team_name = row.team.name;
         const team_color = row.team.color;
 
-        if (!player_totals.has(player_id)) player_totals.set(player_id, { first_name, last_name, points: 0, health: 0 });
-        if (!team_totals.has(team_id)) team_totals.set(team_id, { team_name, team_color, points: 0, health: 0 });
-        player_totals.get(player_id).health += row.remaining_health;
-        player_totals.get(player_id).points += row.points;
-        team_totals.get(team_id).health += row.remaining_health;
-        team_totals.get(team_id).points += row.points;
+        if (!player_totals.has(player_id)) player_totals.set(player_id, { first_name, last_name, points: 0, place: 0, games: 0, health: 0 });
+        if (!team_totals.has(team_id)) team_totals.set(team_id, { team_name, team_color, points: 0, place: 0, games: 0, health: 0 });
+        
+        const player = player_totals.get(player_id);
+        player.points += row.points;
+        player.place += row.place;
+        player.games += 1;
+        player.health += row.remaining_health;
+
+        const team = team_totals.get(team_id);
+        team.points += row.points;
+        team.place += row.place;
+        team.games += 1;
+        team.health += row.remaining_health;
     });
     return { player_totals, team_totals };
 }
 
-export const sortStandings = (totals: any) => {
+export const sortStandings = (totals: any, metric: string) => {
     const sorted = Array.from(totals, ([id, info]) => ({
         id,
         ...info,
     })).sort((a, b) => {
-        if (b.points !== a.points) {
-            return b.points - a.points; // primary sort
+        if (metric === "points") {
+            if (b.points !== a.points) {
+                return b.points - a.points; // primary sort
+            }
+            return b.health - a.health; // secondary sort
+        } else {
+            const aPlaceAvg = a.place / a.games;
+            const bPlaceAvg = b.place / b.games;
+            if (bPlaceAvg !== aPlaceAvg) {
+                return aPlaceAvg - bPlaceAvg; // primary sort
+            }
+            return b.points - a.points; // secondary sort
         }
-        return b.health - a.health; // secondary sort
     });
     return sorted;
 };

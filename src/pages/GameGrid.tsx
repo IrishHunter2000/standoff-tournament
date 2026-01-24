@@ -59,7 +59,6 @@ export default function GameGrid() {
     }
 
 	if (loading) return <p>Loading games...</p>;
-	if (!filteredGames || filteredGames.length === 0) return <p>No games found.</p>;
 
     return (
 		<div className="flex flex-col justify-center items-center">
@@ -106,13 +105,16 @@ export default function GameGrid() {
             </div>
 
             {/* Games List */}
-            <div className="flex flex-wrap justify-center gap-4">
-				{filteredGames.map((g, idx) => (
-					<div key={idx}>
-						<GameCard gameMeta={g} players={g.players} selectedId={selectedPlayerId} secondarySelectedId={selectedTeamId} />
-					</div>
-				))}
-			</div>
+            {!filteredGames?.length
+                ? <p>No games found.</p>
+                : <div className="flex flex-wrap justify-center gap-4">
+                    {filteredGames.map((g, idx) => (
+                        <div key={idx}>
+                            <GameCard gameMeta={g} players={g.players} selectedId={selectedPlayerId} secondarySelectedId={selectedTeamId} />
+                        </div>
+                    ))}
+                </div>
+            }
         </div>
     );
 }

@@ -2,18 +2,17 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useToast } from "../context/ToastContext";
 import { useData } from "../context/DataContext";
-import type { Achievement, Round } from "../types/types";
+import type { Achievement } from "../types/types";
 import { calculateAchievements } from "../helpers/calculate_achievements";
 import { filterGames } from "../helpers/alter_data";
 import { AchievementCard } from "../components/AchievementCard";
 import { motion } from "framer-motion";
 
 export default function AdminControlPanel() {
-    const { currentTournament, tournaments, games, achievements, loadTournaments, loadCurrentRound } = useData();
+    const { currentTournament, tournaments, currentRound, games, achievements, loadTournaments, loadCurrentRound } = useData();
     const { showToast } = useToast();
 
     const [loading, setLoading] = useState(false);
-    const [currentRound, setCurrentRound] = useState<Round>({} as Round);
     const [newTournamentName, setNewTournamentName] = useState("");
     const [newRoundName, setNewRoundName] = useState("");
     const [calculatedAchievements, setCalculatedAchievements] = useState<Achievement[]>([]);
@@ -121,7 +120,6 @@ export default function AdminControlPanel() {
         }
 
         showToast("Round ended", "success");
-        setCurrentRound({} as Round);
     };
 
     const handleCalculateAchievements = () => {

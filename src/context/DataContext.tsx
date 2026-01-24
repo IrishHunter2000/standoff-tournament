@@ -67,7 +67,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         const { data, error } = await supabase
             .from("tournament")
             .select("*")
-            .order("created_at", { ascending: false })
+            .order("created_at", { ascending: false });
 
         if (error) return console.error(error);
         setTournaments([{ id: "all", name: "All Time" }, ...data]);
@@ -75,12 +75,9 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     };
     
     const loadCurrentRound = async () => {
-        if (!currentTournament?.id) return;
-
         const { data } = await supabase
             .from("round")
             .select("*")
-            .eq("tournament_id", currentTournament.id)
             .is("ended_at", null)
             .order("created_at", { ascending: false })
             .limit(1)
@@ -106,6 +103,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
                     name
                 ),
                 players: game_player!inner (
+                    place,
                     points,
                     remaining_health,
                     team: team_id!inner (
@@ -133,6 +131,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
             .select(`
                 player_id,
                 player ( first_name, last_name ),
+                place,
                 points,
                 remaining_health,
                 game ( tournament_id ),

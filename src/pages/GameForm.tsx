@@ -5,23 +5,20 @@ import { useToast } from "../context/ToastContext";
 import { validateForm } from "../context/validation";
 import type { GamePlayerInput } from "../types/types";
 
-const createEmptyEntries = () => ([
-  { player_id: null, team_id: null, health: null },
-  { player_id: null, team_id: null, health: null },
-  { player_id: null, team_id: null, health: null },
-  { player_id: null, team_id: null, health: null },
-]);
+const createEmptyEntries = (numPlayers: number) => {
+    const formEntries = []
+    for (let i = 0; i < numPlayers; i++) {
+        formEntries.push({ player_id: null, team_id: null, health: null })
+    }
+    return formEntries;
+}
 
 export default function GameForm() {
     const { players, teams, currentTournament, currentRound, loadUpdatedTables } = useData();
     const { showToast } = useToast();
 
-    const [formData, setFormData] = useState<GamePlayerInput[]>([
-        { player_id: null, team_id: null, health: null },
-        { player_id: null, team_id: null, health: null },
-        { player_id: null, team_id: null, health: null },
-        { player_id: null, team_id: null, health: null },
-    ]);
+    const [numPlayers, setNumPlayers] = useState<number>(4);
+    const [formData, setFormData] = useState<GamePlayerInput[]>(createEmptyEntries(4));
     const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
     const updateField = (
@@ -74,7 +71,7 @@ export default function GameForm() {
             team_id: player.team_id,
             place: index + 1,
             remaining_health: player.health,
-            points: 4 - (index)
+            points: numPlayers - (index)
         }));
 
         const { error: gpError } = await supabase.from("game_player").insert(rows);
@@ -104,19 +101,32 @@ export default function GameForm() {
         loadUpdatedTables();
     };
     
-    const resetForm = () => {
-        setFormData(createEmptyEntries());
-        setErrorMessages([]); // if you are storing validation errors
+    const newNumPlayers = (newNum: number) => {
+        setNumPlayers(newNum)
+        setFormData(createEmptyEntries(newNum));
+        setErrorMessages([]);
     };
 
-    console.log(currentRound)
+    const resetForm = () => {
+        setFormData(createEmptyEntries(numPlayers));
+        setErrorMessages([]);
+    };
+
     if (!currentTournament.id || !currentRound.id) return <p>No active tournament or round. No games can be submitted until a tournament has begun and a round is active.</p>;
 
     return (
         <div className="mx-auto max-w-3xl p-6 bg-neutral-900 rounded-2xl shadow-xl">
-            <h2 className="text-2xl font-bold text-white mb-4">
+            <h2 className="text-2xl font-bold text-white mb-2">
                 Enter New Game Results
             </h2>
+            <h4 className="text-white mb-2">
+                Number of Players
+            </h4>
+            <div className="mb-2 space-x-2">
+                <button onClick={() => newNumPlayers(3)} className={`${numPlayers === 3 && 'border-red-500!'}`}>3</button>
+                <button onClick={() => newNumPlayers(4)} className={`${numPlayers === 4 && 'border-red-500!'}`}>4</button>
+                <button onClick={() => newNumPlayers(5)} className={`${numPlayers === 5 && 'border-red-500!'}`}>5</button>
+            </div>
 
             {errorMessages.length > 0 && (
                 <div className="flex justify-between bg-red-900 text-red-200 p-2 rounded-lg mb-4">
