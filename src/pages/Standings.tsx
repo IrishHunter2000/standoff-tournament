@@ -72,7 +72,10 @@ export default function StandingsPage() {
         setSelectedName(name);
         setModalType(type);
         const filteredGames = games.filter((game) =>
-            game.players.some((p: any) => (isPlayers ? p.player.id : p.team.id) === id)
+            game.players.some((p: any) => 
+                ((isPlayers ? p.player.id : p.team.id) === id) &&
+                (tournamentFilter !== "all" ? game.tournament.id === tournamentFilter : true)
+            )
         );
         setPlayerGames(filteredGames);
     };

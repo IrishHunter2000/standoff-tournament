@@ -112,7 +112,7 @@ export default function GameForm() {
         setErrorMessages([]);
     };
 
-    if (!currentTournament.id || !currentRound.id) return <p>No active tournament or round. No games can be submitted until a tournament has begun and a round is active.</p>;
+    if (!currentTournament?.id || !currentRound?.id) return <p>No active tournament or round. No games can be submitted until a tournament has begun and a round is active.</p>;
 
     return (
         <div className="mx-auto max-w-3xl p-6 bg-neutral-900 rounded-2xl shadow-xl">

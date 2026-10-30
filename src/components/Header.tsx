@@ -77,7 +77,6 @@ export default function Header({ page, setPage }: { page: string, setPage: (page
                     </button>
                 ))}
             </div>
-
             
             {/* Hamburger Button (mobile only) */}
             <button

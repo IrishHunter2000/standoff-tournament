@@ -24,20 +24,20 @@ export const StandingsCard = ({ standing, index, isPlayers, orderByMetric, openM
             {!medal && <span className="w-[40px] font-medium">
                 {index + 1}
             </span>}
-            <span className={`w-full max-w-[170px] ${nameMaxWidth} ml-[10px] text-left font-semibold`}>
+            <span className={`w-full max-w-[140px] ${nameMaxWidth} ml-[10px] text-left font-semibold`}>
                 {standingName}
             </span>
             <span className="w-[80px] font-bold">
                 {orderByMetric === "points" ? `${standing.points} pts` : `${(standing.place / standing.games).toFixed(2)}`}
             </span>
             <p
-                className="w-1/8 cursor-pointer text-xs text-gray-600"
+                className="w-1/7 cursor-pointer text-xs text-gray-600"
                 onClick={() => openModal(standing.id, "games", standingName)}
             >
                 View Games
             </p>
             <p
-                className="w-1/8 cursor-pointer text-xs text-gray-600"
+                className="w-1/7 cursor-pointer text-xs text-gray-600"
                 onClick={() => openModal(standing.id, "stats", standingName)}
             >
                 View Stats

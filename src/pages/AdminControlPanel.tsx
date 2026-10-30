@@ -223,7 +223,7 @@ export default function AdminControlPanel() {
 
                             <div className="flex justify-around items-center">
                                 <input
-                                    disabled={loading || Object.entries(currentTournament).length !== 0}
+                                    disabled={loading || Object.entries(currentTournament)?.length !== 0}
                                     className="md:w-1/3 p-2 rounded bg-neutral-700"
                                     placeholder="Tournament name"
                                     value={newTournamentName}
@@ -238,7 +238,7 @@ export default function AdminControlPanel() {
                                     <span className="hidden md:inline">Start Tournament</span>
                                 </button>
                                 <button
-                                    disabled={loading || Object.entries(currentTournament).length === 0}
+                                    disabled={loading || Object.entries(currentTournament)?.length === 0}
                                     onClick={endTournament}
                                     className="rounded-lg bg-red-800! py-2 font-semibold disabled:opacity-50"
                                 >
@@ -254,7 +254,6 @@ export default function AdminControlPanel() {
 
                             <div className="flex justify-around items-center">
                                 <input
-                                    disabled={loading || Object.entries(currentRound).length !== 0 || Object.entries(currentTournament).length === 0}
                                     className="md:w-1/3 p-2 rounded bg-neutral-700"
                                     placeholder="Round name"
                                     value={newRoundName}
@@ -269,7 +268,7 @@ export default function AdminControlPanel() {
                                     <span className="hidden md:inline">Start New Round</span>
                                 </button>
                                 <button
-                                    disabled={loading || Object.entries(currentRound).length === 0}
+                                    disabled={loading || currentRound === null || Object.entries(currentRound)?.length === 0}
                                     onClick={endCurrentRound}
                                     className="rounded-lg bg-red-800! py-2 font-semibold disabled:opacity-50"
                                 >
@@ -282,7 +281,7 @@ export default function AdminControlPanel() {
                 }
                 {subPage === "achievements" &&
                     <>
-                        {calculatedAchievements.length !== 0 && Object.entries(currentTournament).length !== 0 ?
+                        {calculatedAchievements.length !== 0 && Object.entries(currentTournament)?.length !== 0 ?
                             <div>
                                 {/* Achievements List */}
                                 <div className="md:columns-5 md:w-[1270px]">
