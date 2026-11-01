@@ -209,29 +209,27 @@ const calculateConsistencyAchievement = (games: Game[], failureRule: Consistency
 };
 
 const calcMostFirstPlaces = (games: any[]) => {
-    return calcMostPlacement(games, 4);
-}
-
-const calcMostSecondPlaces = (games: any[]) => {
-    return calcMostPlacement(games, 3);
-}
-
-const calcMostThirdPlaces = (games: any[]) => {
-    return calcMostPlacement(games, 2);
-}
-
-const calcMostFourthPlaces = (games: any[]) => {
     return calcMostPlacement(games, 1);
 }
 
-const calcMostPlacement = (games: any[], pointsValue: number): PlayerAchievement[] => {
+const calcMostSecondPlaces = (games: any[]) => {
+    return calcMostPlacement(games, 2);
+}
+
+const calcMostThirdPlaces = (games: any[]) => {
+    return calcMostPlacement(games, 3);
+}
+
+const calcMostFourthPlaces = (games: any[]) => {
+    return calcMostPlacement(games, 4);
+}
+
+const calcMostPlacement = (games: any[], placeValue: number): PlayerAchievement[] => {
     const counts: Record<string, PlayerAchievement> = {};
-    let totalGamesWithPlacement = 0;
 
     games.forEach((game) => {
         game.players.forEach((gp: any) => {
-            if (gp.points === pointsValue) {
-                totalGamesWithPlacement++;
+            if (gp.place === placeValue) {
 
                 const id = gp.player.id;
 

@@ -22,6 +22,7 @@ export type Game = {
 export type GamePlayer = {
     player: Player;
     points: number;
+    place: number;
     remaining_health: number;
     team: Team;
     game?: {

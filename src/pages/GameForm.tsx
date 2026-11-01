@@ -20,6 +20,7 @@ export default function GameForm() {
     const [numPlayers, setNumPlayers] = useState<number>(4);
     const [formData, setFormData] = useState<GamePlayerInput[]>(createEmptyEntries(4));
     const [errorMessages, setErrorMessages] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const updateField = (
         index: number,
@@ -34,71 +35,79 @@ export default function GameForm() {
 
     const handleSubmit = async () => {
         if (!currentTournament) return showToast("No tournament found.", "error");
-        const { valid, errors } = validateForm(formData);
 
+        const { valid, errors } = validateForm(formData);
         if (!valid) {
-            setErrorMessages(errors); // state holding validation errors
-            return; // stop submission
+            setErrorMessages(errors);
+            return;
         }
         setErrorMessages([]);
 
-        // determine new game number
-        const newGameNumber = currentTournament.number_of_games + 1;
+        setIsSubmitting(true);
+        try {
+            // determine new game number
+            const newGameNumber = currentTournament.number_of_games + 1;
 
-        // 1. Create the game
-        const { data: gameData, error: gameError } = await supabase
-            .from("game")
-            .insert([
-                {
-                tournament_id: currentTournament.id,
-                game_number: newGameNumber,
-                round_id: currentRound.id
-                },
-            ])
-            .select()
-            .single();
+            // 1. Create the game
+            const { data: gameData, error: gameError } = await supabase
+                .from("game")
+                .insert([
+                    {
+                    tournament_id: currentTournament.id,
+                    game_number: newGameNumber,
+                    round_id: currentRound.id
+                    },
+                ])
+                .select()
+                .single();
 
-        if (gameError) {
-            console.error(gameError);
-            showToast("Error creating game.", "error");
-            return;
+            if (gameError) {
+                console.error(gameError);
+                showToast("Error creating game.", "error");
+                return;
+            }
+
+            // 2. Insert game_players rows
+            const rows = formData.map((player, index) => ({
+                game_id: gameData.id,
+                player_id: player.player_id,
+                team_id: player.team_id,
+                place: index + 1,
+                remaining_health: player.health,
+                points: numPlayers - (index)
+            }));
+
+            const { error: gpError } = await supabase.from("game_player").insert(rows);
+
+            if (gpError) {
+                console.error(gpError);
+                showToast("Error creating game players.", "error");
+                return;
+            }
+
+            // 3. Update tournament number_of_games
+            const { error: tError } = await supabase
+                .from("tournament")
+                .update({ number_of_games: newGameNumber })
+                .eq("id", currentTournament.id)
+                .select()
+                .single();
+
+            if (tError) {
+                console.error(tError);
+                showToast("Error updating tournament.", "error");
+                return;
+            }
+
+            showToast("Game submitted successfully!", "success");
+            resetForm();
+            await loadUpdatedTables();
+        } catch (error) {
+            console.error(error);
+            showToast("Unexpected error submitting game.", "error");
+        } finally {
+            setIsSubmitting(false);
         }
-
-        // 2. Insert game_players rows
-        const rows = formData.map((player, index) => ({
-            game_id: gameData.id,
-            player_id: player.player_id,
-            team_id: player.team_id,
-            place: index + 1,
-            remaining_health: player.health,
-            points: numPlayers - (index)
-        }));
-
-        const { error: gpError } = await supabase.from("game_player").insert(rows);
-
-        if (gpError) {
-            console.error(gpError);
-            showToast("Error creating game players.", "error");
-            return;
-        }
-
-        // 3. Update tournament number_of_games
-        const { error: tError } = await supabase
-            .from("tournament")
-            .update({ number_of_games: newGameNumber })
-            .eq("id", currentTournament.id)
-            .select()
-            .single();
-
-        if (tError) {
-            console.error(tError);
-            showToast("Error updating tournament.", "error");
-            return;
-        }
-
-        showToast("Game submitted successfully!", "success");
-        resetForm();
-        loadUpdatedTables();
     };
     
     const newNumPlayers = (newNum: number) => {
@@ -227,9 +236,10 @@ export default function GameForm() {
             </button>
             <button
                 onClick={handleSubmit}
+                disabled={isSubmitting}
                 className="md:w-1/5 mt-2 p-3"
             >
-                Submit Game
+                {isSubmitting ? "Submitting..." : "Submit Game"}
             </button>
         </div>
     );

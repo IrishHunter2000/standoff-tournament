@@ -13,7 +13,7 @@ export const GameCard = ({ gameMeta, players, selectedId, secondarySelectedId }:
             </p>
 
             <div className="w-full">
-                {players.map((p: GamePlayer, i: number) => {
+                {players.sort((a, b) => a.place - b.place).map((p: GamePlayer, i: number) => {
                     const teamName = p.team?.name ?? "Unknown";
                     const style = getTeamStyle(teamName);
                     const highlightName = ([String(p.player.id), String(p.team.id)].includes(selectedId || "") || [String(p.player.id), String(p.team.id)].includes(secondarySelectedId || ""))

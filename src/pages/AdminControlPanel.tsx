@@ -281,7 +281,7 @@ export default function AdminControlPanel() {
                 }
                 {subPage === "achievements" &&
                     <>
-                        {calculatedAchievements.length !== 0 && Object.entries(currentTournament)?.length !== 0 ?
+                        {calculatedAchievements.length !== 0 ?
                             <div>
                                 {/* Achievements List */}
                                 <div className="md:columns-5 md:w-[1270px]">
